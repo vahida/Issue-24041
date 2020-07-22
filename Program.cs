@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace BareBoneMembershipApi
 {
@@ -11,7 +12,9 @@ namespace BareBoneMembershipApi
         public static IConfiguration Configuration { get; } = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+            .AddJsonFile(
+                $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+                optional: true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -21,7 +24,7 @@ namespace BareBoneMembershipApi
 
             //Log.Logger = new LoggerConfiguration()
             //    .ReadFrom.Configuration(Configuration)
-            //    .Destructure.UsingAttributes()
+            //    .Destructure.UsingAttributes() 
             //    .CreateLogger();
 
             try
@@ -49,11 +52,18 @@ namespace BareBoneMembershipApi
             //        webBuilder.UseStartup<Startup>()
             //            .UseHealthChecks("/health");
             //    });
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+
+            return
+                Host.CreateDefaultBuilder(args)
+                    .ConfigureLogging(logging =>
+                    {
+                        logging.ClearProviders();
+                        logging.AddDebug();
+                    })
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseStartup<Startup>();
+                    });
         }
     }
 }
